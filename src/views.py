@@ -41,7 +41,7 @@ def main_func(date: str, period: str = 'M'):
 
 def expenses(df: list) -> list:
     # sum = 0
-    # expenses_trans = []
+    expenses_trans = []
     # for trans in df:
     #     if float(trans['Сумма платежа']) < 0:
     #         sum += float(trans['Сумма операции с округлением'])
