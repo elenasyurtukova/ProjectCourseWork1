@@ -1,8 +1,13 @@
 from collections import Counter
 from datetime import datetime, timedelta
 import pandas as pd
+from unicodedata import category
 
-def main_func(df, date: str, period: str = 'M'):
+from src.utils import func_read_file_excel, filter_by_period
+
+
+def main_func(date: str, period: str = 'M'):
+    # получаем 2 даты, между которыми будем анализировать данные
     date1 = datetime.strptime(date, "%d.%m.%Y")
     if period == 'W':
         if date1.day > 7:
@@ -16,15 +21,20 @@ def main_func(df, date: str, period: str = 'M'):
     elif period == 'ALL':
         date2 = datetime(2017, 1, 1)
 
-    filtered_transactions = []
-    df_OK = df.loc[df.Статус == 'OK']
-    # for trans in df:
-    df_date = df.loc[(date2 <= datetime.strptime(df_OK['Дата операции'], '%d.%m.%Y %H:%M:%S') <= date1)]
-    # date = datetime.strptime(df_OK['Дата операции'], '%d.%m.%Y %H:%M:%S')
-        # if trans['Статус'] == 'OK':
-        #     if date2 <= date <= date1:
-        #         filtered_transactions.append(trans)
-    return df_date
+    df = func_read_file_excel('../data/operations.xlsx')  # вызываем функцию для получения данных из файла excel
+    print(date1, date2)
+    df_OK = df.loc[df['Статус'] == 'OK'] # фильтруем только успешные операции
+
+    filtered_df = filter_by_period(date1, date2, df_OK) # вызываем функцию для фильтрации датафрейма по датам
+    print(filtered_df)
+    expenses_df = filtered_df[filtered_df['Сумма операции'] < 0] # фильтруем только расходные операции
+    total_amount_expenses = round(expenses_df['Сумма операции с округлением'].sum()) # определяем сумму расходных операций
+    category_grouped_expenses_df = expenses_df.groupby('Категория')['Сумма операции с округлением'].sum()
+    print(category_grouped_expenses_df)
+
+
+
+
 
 def expenses(df: list) -> list:
     # sum = 0
@@ -36,26 +46,15 @@ def expenses(df: list) -> list:
     #         expenses_trans.append(trans)
     #         sum_of_expenses = round(sum) # сумма всех расходных операций
 
-    return df1
+    pass
 
 
 
 
-def func_read_file_excel(path: str) -> list:
-    """Функция: считывает данные из файла excel и возвращает список словарей транзакций"""
-    try:
-        df = pd.read_excel(path)
-        # list_of_transactions = df.to_dict(orient="records")
-        return df
-    except FileNotFoundError:
-        print("Файл не найден")
-        return []
+
 
 if __name__ == "__main__":
-   df = func_read_file_excel('../data/operations.xlsx')
-
-   df1 = main_func(df, '25.07.2018', 'ALL')
-   print(expenses(df1))
+   main_func('17.09.2020', 'W')
 
 
 
