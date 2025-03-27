@@ -14,6 +14,7 @@ def func_read_file_excel(path: str) -> list:
 
 def filter_by_period(date1: datetime, date2: datetime, df):
     """Функция фильтрует датафрейм: попадают данные между заданными датами"""
-    df['Дата операции'] = pd.to_datetime(df['Дата операции'])
+    df = df.copy()  # Создаем копию DataFrame, чтобы избежать предупреждений
+    df['Дата операции'] = pd.to_datetime(df['Дата операции'], format='%d.%m.%Y %H:%M:%S')
     filtered_df = df.loc[(df['Дата операции'] <= date1)&(df['Дата операции'] >= date2)]
     return filtered_df
