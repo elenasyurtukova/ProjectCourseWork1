@@ -30,7 +30,10 @@ def main_func(date: str, period: str = 'M'):
     expenses_df = filtered_df[filtered_df['Сумма операции'] < 0] # фильтруем только расходные операции
     total_amount_expenses = round(expenses_df['Сумма операции с округлением'].sum()) # определяем сумму расходных операций
     category_grouped_expenses_df = expenses_df.groupby('Категория')['Сумма операции с округлением'].sum()
-    print(category_grouped_expenses_df)
+    category_expenses_df = category_grouped_expenses_df.sort_values(ascending=False)
+    category_expenses_dict = category_expenses_df.to_dict()
+    print(category_expenses_dict)
+
 
 
 
