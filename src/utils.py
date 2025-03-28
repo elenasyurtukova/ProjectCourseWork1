@@ -52,5 +52,21 @@ def converse_cur_by_date(cur_code: str, date: datetime):
     result = round((response.json()["result"]), 2)
     return result
 
-usd = converse_cur_by_date('USD', '2020-09-17')
-print(usd)
+def get_price_stock_promotion(code_promotion, date: datetime):
+    load_dotenv(dotenv_path="../.env")
+    api_key = os.getenv("API_key")
+    symbol = code_promotion  # Символ акции, например, Apple "AAPL"
+    url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=full&apikey={api_key}"
+
+    response = requests.get(url)
+    data = response.json()
+
+    # Получаем данные для указанной даты
+    if date in data["Time Series (Daily)"]:
+        daily_data = data["Time Series (Daily)"][date]
+        price_promotion = round(float(daily_data['4. close']),2)
+        return price_promotion
+    else:
+        print(f"Данные на {date} не найдены.")
+
+# print(get_price_stock_promotion('AAPL', '2020-09-10'))

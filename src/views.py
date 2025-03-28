@@ -4,7 +4,8 @@ import pandas as pd
 from unicodedata import category
 import requests
 
-from src.utils import func_read_file_excel, filter_by_period, func_read_file_json, converse_cur_by_date
+from src.utils import func_read_file_excel, filter_by_period, func_read_file_json, converse_cur_by_date, \
+    get_price_stock_promotion
 
 
 def main_func(date: str, period: str = 'M'):
@@ -23,11 +24,11 @@ def main_func(date: str, period: str = 'M'):
         date2 = datetime(2017, 1, 1)
 
     df = func_read_file_excel('../data/operations.xlsx')  # вызываем функцию для получения данных из файла excel
-    print(date1, date2)
+    # print(date1, date2)
     df_OK = df.loc[df['Статус'] == 'OK'] # фильтруем только успешные операции
-    print(df_OK)
+    # print(df_OK)
     filtered_df = filter_by_period(date1, date2, df_OK) # вызываем функцию для фильтрации датафрейма по датам
-    print(filtered_df)
+    # print(filtered_df)
 
    # расходная часть
     expenses_df = filtered_df[filtered_df['Сумма операции'] < 0] # фильтруем только расходные операции
@@ -35,9 +36,9 @@ def main_func(date: str, period: str = 'M'):
     category_grouped_expenses_df = expenses_df.groupby('Категория')['Сумма операции с округлением'].sum()
     category_expenses_df = category_grouped_expenses_df.sort_values(ascending=False)
     category_expenses_dict = category_expenses_df.to_dict()
-    print(category_expenses_dict)
-    print(type(category_expenses_dict))
-    print(len(category_expenses_dict))
+    # print(category_expenses_dict)
+    # print(type(category_expenses_dict))
+    # print(len(category_expenses_dict))
     if len(category_expenses_dict) <= 7:
         category_expenses_list = []
         for key, value in category_expenses_dict.items():
@@ -45,7 +46,7 @@ def main_func(date: str, period: str = 'M'):
             elem['category'] = key
             elem['amount'] = round(value)
             category_expenses_list.append(elem)
-        print(category_expenses_list)
+        # print(category_expenses_list)
     elif len(category_expenses_dict) > 7:
         category_expenses_list = [{'category': key, 'amount': round(value)} for key, value in category_expenses_dict.items()]
         elem_7 = category_expenses_list[:7]
@@ -53,7 +54,7 @@ def main_func(date: str, period: str = 'M'):
         sum_last = sum(elem['amount'] for elem in elem_last)
         last_value = {'category': 'Остальное', 'amount': round(sum_last)}
         category_expenses_list = elem_7 + [last_value]
-        print(category_expenses_list)
+        # print(category_expenses_list)
 
     # определяем сумму операций c наличными и переводами
     amount_cash = round(filtered_df[filtered_df['Категория'] == 'Наличные']['Сумма операции'].sum())
@@ -68,23 +69,42 @@ def main_func(date: str, period: str = 'M'):
     category_incoming_dict = category_incoming_df.to_dict()
     category_incoming_list = [{'category': key, 'amount': round(value)} for key, value in
                               category_incoming_dict.items()]
-    print(category_incoming_list)
+    # print(category_incoming_list)
 
     user_settings = func_read_file_json('../user_settings.json')
-    print(user_settings)
+    # print(user_settings)
     # {'user_currencies': ['USD', 'EUR'], 'user_stocks': ['AAPL', 'AMZN', 'GOOGL', 'MSFT', 'TSLA']}
 
     currency_rates = []
-    for cur in user_settings['user_currencies']:
-        cur_value = converse_cur_by_date(cur, date1)
-        elem = {"currency": cur, "rate": cur_value}
+    for i in range(len(user_settings['user_currencies'])):
+        cur_code = user_settings['user_currencies'][i]
+        date = date1.strftime('%Y-%m-%d')
+        cur_value = converse_cur_by_date(cur_code, date)
+        elem = {"currency": cur_code, "rate": cur_value}
         currency_rates.append(elem)
-    print(currency_rates)
+    # print(currency_rates)
 
-
-
-
-
+    stock_prices = []
+    for i in range(len(user_settings['user_stocks'])):
+        code_promotion = user_settings['user_stocks'][i]
+        date = date1.strftime('%Y-%m-%d')
+        price_value = get_price_stock_promotion(code_promotion, date)
+        elem = {"stock": code_promotion, "price": price_value}
+        stock_prices.append(elem)
+    # print(stock_prices)
+    result = {}
+    expenses_dict = {}
+    expenses_dict["total_amount"] = total_amount_expenses
+    expenses_dict["main"] = category_expenses_list
+    expenses_dict["transfers_and_cash"] = list_cash_transfers
+    income_dict = {}
+    income_dict["total_amount"] = total_amount_incoming
+    income_dict["main"] = category_incoming_list
+    result["expenses"] = expenses_dict
+    result["income"] = income_dict
+    result["currency_rates"] = currency_rates
+    result["stock_prices"] = stock_prices
+    print(result)
 
 
 
@@ -94,61 +114,30 @@ if __name__ == "__main__":
 
 
 # {
-#   "expenses": {
-#     "total_amount": 32101,
-#     "main": [
-#       {
-#         "category": "Супермаркеты",
-#         "amount": 17319
-#       },
-#       {
-#         "category": "Фастфуд",
-#         "amount": 3324
-#   },
-#       {
-#         "category": "Топливо",
-#         "amount": 2289
-#       },
-#       {
-#         "category": "Развлечения",
-#         "amount": 1850
-#       },
-#       {
-#         "category": "Медицина",
-#         "amount": 1350
-#       },
-#       {
-#         "category": "Остальное",
-#         "amount": 2954
-#       }
-#     ],
-#     "transfers_and_cash": [
-#       {
-#         "category": "Наличные",
-#         "amount": 500
-#       },
-#       {
-#         "category": "Переводы",
-#         "amount": 200
-#       }
-#     ]
-#   },
-#   "income": {
-#     "total_amount": 54271,
-#     "main": [
-#       {
-#         "category": "Пополнение_BANK007",
-#         "amount": 33000
-#       },
-#       {
-#         "category": "Проценты_на_остаток",
-#         "amount": 1242
-#       },
-#       {
-#         "category": "Кэшбэк",
-#         "amount": 29
-#       }
-#     ]
+#   "expenses": {"total_amount": 32101,
+#     "main": [{"category": "Супермаркеты",
+#         "amount": 17319},
+#       {"category": "Фастфуд",
+#         "amount": 3324},
+#       {"category": "Топливо",
+#         "amount": 2289},
+#       {"category": "Развлечения",
+#         "amount": 1850},
+#       {"category": "Медицина",
+#         "amount": 1350},
+#       {"category": "Остальное",
+#         "amount": 2954}],
+#     "transfers_and_cash": [{"category": "Наличные",
+#         "amount": 500},
+#       {"category": "Переводы",
+#         "amount": 200}]},
+#   "income": {"total_amount": 54271,
+#              "main": [{"category": "Пополнение_BANK007",
+#         "amount": 33000},
+#       {"category": "Проценты_на_остаток",
+#         "amount": 1242},
+#       {"category": "Кэшбэк",
+#         "amount": 29}]
 #   },
 #   "currency_rates": [
 #     {
