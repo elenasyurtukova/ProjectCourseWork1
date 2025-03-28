@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 from unicodedata import category
 
-from src.utils import func_read_file_excel, filter_by_period
+from src.utils import func_read_file_excel, filter_by_period, func_read_file_json
 
 
 def main_func(date: str, period: str = 'M'):
@@ -68,6 +68,8 @@ def main_func(date: str, period: str = 'M'):
     category_incoming_list = [{'category': key, 'amount': round(value)} for key, value in
                               category_incoming_dict.items()]
     print(category_incoming_list)
+
+    user_settings = func_read_file_json('../user_settings.json')
 
 
 
