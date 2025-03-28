@@ -2,8 +2,9 @@ from collections import Counter
 from datetime import datetime, timedelta
 import pandas as pd
 from unicodedata import category
+import requests
 
-from src.utils import func_read_file_excel, filter_by_period, func_read_file_json
+from src.utils import func_read_file_excel, filter_by_period, func_read_file_json, converse_cur_by_date
 
 
 def main_func(date: str, period: str = 'M'):
@@ -70,6 +71,15 @@ def main_func(date: str, period: str = 'M'):
     print(category_incoming_list)
 
     user_settings = func_read_file_json('../user_settings.json')
+    print(user_settings)
+    # {'user_currencies': ['USD', 'EUR'], 'user_stocks': ['AAPL', 'AMZN', 'GOOGL', 'MSFT', 'TSLA']}
+
+    currency_rates = []
+    for cur in user_settings['user_currencies']:
+        cur_value = converse_cur_by_date(cur, date1)
+        elem = {"currency": cur, "rate": cur_value}
+        currency_rates.append(elem)
+    print(currency_rates)
 
 
 

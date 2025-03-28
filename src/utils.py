@@ -1,6 +1,11 @@
+import os
 from datetime import datetime
 import pandas as pd
 import json
+
+import requests
+from dotenv import load_dotenv
+
 
 def func_read_file_excel(path: str) -> list:
     """Функция: считывает данные из файла excel и возвращает список словарей транзакций"""
@@ -22,13 +27,30 @@ def filter_by_period(date1: datetime, date2: datetime, df):
 
 def func_read_file_json(path: str) -> dict:
     """функция: читает данные из json-файла пользовательских настроек"""
-    with open(path, encoding="utf-8") as file:
-        try:
-            user_settings = json.load(file)
-            return user_settings
-        except json.JSONDecodeError:
-            print("Ошибка декодирования файла")
-            return {}
+    try:
+        with open(path, encoding="utf-8") as file:
+            try:
+                user_settings = json.load(file)
+                return user_settings
+            except json.JSONDecodeError:
+                print("Ошибка декодирования файла")
+                return {}
     except FileNotFoundError:
-    print("Файл не найден")
-    return {}
+        print("Файл не найден")
+        return {}
+
+def converse_cur_by_date(cur_code: str, date: datetime):
+    """функция конвертирует валюту в рубли на заданную дату"""
+    url = f"https://api.apilayer.com/exchangerates_data/convert?to=RUB&from={cur_code}&amount=1&date={date}"
+    load_dotenv(dotenv_path="../.env")
+    API_KEY = os.getenv("API_KEY")
+    payload = {}
+    headers = {"apikey": API_KEY}
+    response = requests.get(url, headers=headers, data=payload)
+    if response.status_code != 200:
+        raise ValueError("Failed to get currency rate")
+    result = round((response.json()["result"]), 2)
+    return result
+
+usd = converse_cur_by_date('USD', '2020-09-17')
+print(usd)
