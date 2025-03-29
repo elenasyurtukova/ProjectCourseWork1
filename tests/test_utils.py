@@ -2,31 +2,90 @@ import unittest
 from unittest.mock import patch
 
 import pandas as pd
+import pytest
 
+from src.utils import func_read_file_json, filter_by_period
 from src.views import func_read_file_excel
 
 
 class TestReadExcelFile(unittest.TestCase):
     def test_valid_data(self):
         mock_data = pd.DataFrame(
-            {'Дата операции': ['01.01.2018 12:49:53'],
+            {'Дата операции': ['31.12.2021 16:44:00'],
              'Номер карты': [None], 'Статус': ['OK'],
              'Сумма операции': [-3000.0], 'Валюта операции': ['RUB'],
              'Кэшбэк': [None], 'Категория': ['Переводы'],
              'Описание': ['Линзомат ТЦ Юность'],
-             'Бонусы (включая кэшбэк)': [0],
-             'Округление на инвесткопилку': [0],
-             'Сумма операции с округлением': [3000.0]}
+             }
         )
         with patch("pandas.read_excel", return_value=mock_data):
             result = func_read_file_excel("operations.xlsx")
             self.assertEqual(len(result), 1)
-            self.assertEqual(result[0]["Статус"], "OK")
+            self.assertEqual(result["Дата операции"][0], "31.12.2021 16:44:00")
 
     def test_file_not_found(self):
         with patch("pandas.read_excel", side_effect=FileNotFoundError):
             result = func_read_file_excel("operations.xlsx")
             self.assertEqual(result, [])
+
+class TestJsonReader(unittest.TestCase):
+    @patch("builtins.open")
+    @patch("json.load")
+    def test_func_read_file_json(self: "TestJsonReader", mock_json_load, mock_open):
+        # Задаю тестовые данные
+        mock_json_load.return_value = [
+            {
+            "user_currencies": ["USD", "EUR"],
+            "user_stocks": ["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]
+            }
+        ]
+        # Вызываю функцию и проверяю результат
+        result = func_read_file_json("path/to/file.json")
+        self.assertEqual(result, [
+                    {
+                    "user_currencies": ["USD", "EUR"],
+                    "user_stocks": ["AAPL", "AMZN", "GOOGL", "MSFT", "TSLA"]
+                    }
+            ],
+        )
+        mock_json_load.return_value = []
+        # Вызываю функцию и проверяю результат
+        result = func_read_file_json("path/to/file.json")
+        self.assertEqual(result, [])
+
+    @patch("builtins.open", side_effect=FileNotFoundError)
+    def test_file_not_found(self, mock_open):
+        # Вызываю свою функцию и проверяю, что она возвращает пустой список
+        result = func_read_file_json("path/to/nonexistent/file.json")
+        self.assertEqual(result, {})
+
+@pytest.fixture()
+def df():
+    return pd.DataFrame({'Валюта операции': ['RUB', 'RUB', 'RUB'], 'Дата операции': ['30.12.2021 16:44:00', '29.12.2021 12:22:00', '28.12.2021 10:02:00'],
+                          'Статус': ['OK', 'OK', 'OK'], 'Сумма операции': [-3000.0, -200.0, -10000.0],
+                          })
+
+@pytest.mark.parametrize(
+    "date1, date2, expected_df",
+    [
+        ("31.12.2021 16:44:00", "25.12.2021 16:44:00",(
+                {'Валюта операции': ['RUB', 'RUB', 'RUB'],
+                 'Дата операции': ['30.12.2021 16:44:00', '29.12.2021 12:22:00', '28.12.2021 10:02:00'],
+                'Статус': ['OK', 'OK', 'OK'], 'Сумма операции': [-3000.0, -200.0, -10000.0],
+                })
+                                                        ),
+        ("31.12.2021 16:44:00", "30.12.2021 00:44:00", ({'Валюта операции': ['RUB'],
+                                                         'Дата операции': ['30.12.2021 16:44:00'],
+                                                         'Статус': ['OK'], 'Сумма операции': [-3000.0]}
+        )),
+    ],
+)
+def test_filter_by_period(df, date1, date2, expected_df):
+    date1 = pd.to_datetime(date1)
+    date2 = pd.to_datetime(date2)
+    df['Дата операции'] = pd.to_datetime(df['Дата операции'])
+    pd.testing.assert_frame_equal(filter_by_period(df, date1, date2), expected_df)
+
 
 
 if __name__ == "__main__":

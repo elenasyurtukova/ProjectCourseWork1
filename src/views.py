@@ -1,17 +1,25 @@
-from collections import Counter
 from datetime import datetime, timedelta
 import json
-import pandas as pd
-from unicodedata import category
-import requests
+from src.utils import func_read_file_excel, filter_by_period, func_read_file_json, converse_cur_by_date
+    # get_price_stock_promotion
+import logging
 
-from src.utils import func_read_file_excel, filter_by_period, func_read_file_json, converse_cur_by_date, \
-    get_price_stock_promotion
-
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(filename)s - %(levelname)s: %(message)s",
+    filename="../logs/views.log",
+    encoding="UTF-8",
+    filemode="w",
+)
+logger = logging.getLogger("views")
 
 def main_func(date: str, period: str = 'M'):
     # получаем 2 даты, между которыми будем анализировать данные
-    date1 = datetime.strptime(date, "%d.%m.%Y")
+    try:
+        date1 = datetime.strptime(date, "%d.%m.%Y")
+    except Exception as e:
+        logger.error("Задан неверный формат даты")
+        print(f"Error: {type(e).__name__}, задан неверный формат даты")
     if period == 'W':
         if date1.day > 7:
             date2 = date1 - timedelta(days=7)
@@ -23,14 +31,17 @@ def main_func(date: str, period: str = 'M'):
         date2 = datetime(date1.year, 1, 1)
     elif period == 'ALL':
         date2 = datetime(2017, 1, 1)
-
+    else:
+        print("Задан неверный период, для работы программы используем период с начала месяца")
+        date2 = datetime(date1.year, date1.month, 1)
+    logger.info("Рассчитан период времени для анализа")
     df = func_read_file_excel('../data/operations.xlsx')  # вызываем функцию для получения данных из файла excel
-    # print(date1, date2)
+    print(date1, date2)
     df_OK = df.loc[df['Статус'] == 'OK'] # фильтруем только успешные операции
-    # print(df_OK)
+    print(df_OK)
     filtered_df = filter_by_period(date1, date2, df_OK) # вызываем функцию для фильтрации датафрейма по датам
     # print(filtered_df)
-
+    logger.info("Отфильтрованы данные со статусом 'ОК' в заданном временном интервале")
    # расходная часть
     expenses_df = filtered_df[filtered_df['Сумма операции'] < 0] # фильтруем только расходные операции
     total_amount_expenses = round(expenses_df['Сумма операции с округлением'].sum()) # определяем сумму расходных операций
@@ -106,71 +117,7 @@ def main_func(date: str, period: str = 'M'):
     result["currency_rates"] = currency_rates
     result["stock_prices"] = stock_prices
     json_result = json.dumps(result, indent=4, ensure_ascii=False)
-    print(json_result)
+    logger.info("Данные проанализированы и получен результат в формате json")
+    return json_result
 
-
-
-if __name__ == "__main__":
-   main_func('09.01.2019', 'M')
-
-
-
-# {
-#   "expenses": {"total_amount": 32101,
-#     "main": [{"category": "Супермаркеты",
-#         "amount": 17319},
-#       {"category": "Фастфуд",
-#         "amount": 3324},
-#       {"category": "Топливо",
-#         "amount": 2289},
-#       {"category": "Развлечения",
-#         "amount": 1850},
-#       {"category": "Медицина",
-#         "amount": 1350},
-#       {"category": "Остальное",
-#         "amount": 2954}],
-#     "transfers_and_cash": [{"category": "Наличные",
-#         "amount": 500},
-#       {"category": "Переводы",
-#         "amount": 200}]},
-#   "income": {"total_amount": 54271,
-#              "main": [{"category": "Пополнение_BANK007",
-#         "amount": 33000},
-#       {"category": "Проценты_на_остаток",
-#         "amount": 1242},
-#       {"category": "Кэшбэк",
-#         "amount": 29}]
-#   },
-#   "currency_rates": [
-#     {
-#       "currency": "USD",
-#       "rate": 73.21
-#     },
-#     {
-#       "currency": "EUR",
-#       "rate": 87.08
-#     }
-#   ],
-#   "stock_prices": [
-#     {
-#       "stock": "AAPL",
-#       "price": 150.12
-#     },
-#     {
-#       "stock": "AMZN",
-#       "price": 3173.18
-#     },
-#     {
-#       "stock": "GOOGL",
-#       "price": 2742.39
-#     },
-#     {
-#       "stock": "MSFT",
-#       "price": 296.71
-#     },
-#     {
-#       "stock": "TSLA",
-#       "price": 1007.08
-#     }
-#   ]
-# }
+# main_func('09.01.2019', 'b')

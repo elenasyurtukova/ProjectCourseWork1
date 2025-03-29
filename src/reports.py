@@ -19,8 +19,6 @@ logging.basicConfig(
 logger = logging.getLogger("reports")
 
 
-
-
 def write_file(filename: str | None = None) -> Callable:
     """Декоратор, записывает результат работы функции в файл"""
 
