@@ -2,18 +2,27 @@ import os
 from datetime import datetime
 import pandas as pd
 import json
-
 import requests
 from dotenv import load_dotenv
+import logging
 
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s - %(filename)s - %(levelname)s: %(message)s",
+    filename="../logs/utils.log",
+    encoding="UTF-8",
+    filemode="w",
+)
+logger = logging.getLogger("utils")
 
 def func_read_file_excel(path: str) -> list:
     """Функция: считывает данные из файла excel и возвращает список словарей транзакций"""
     try:
         df = pd.read_excel(path)
-        # list_of_transactions = df.to_dict(orient="records")
+        logger.info("При чтении файла excel получен датафрейм")
         return df
     except FileNotFoundError:
+        logger.error("Файл не найден")
         print("Файл не найден")
         return []
 
@@ -23,6 +32,7 @@ def filter_by_period(date1: datetime, date2: datetime, df):
     df = df.copy()  # Создаем копию DataFrame, чтобы избежать предупреждений
     df['Дата операции'] = pd.to_datetime(df['Дата операции'], format='%d.%m.%Y %H:%M:%S')
     filtered_df = df.loc[(df['Дата операции'] <= date1)&(df['Дата операции'] >= date2)]
+    logger.info("Данные отфильтрованы по заданному периоду")
     return filtered_df
 
 def func_read_file_json(path: str) -> dict:
