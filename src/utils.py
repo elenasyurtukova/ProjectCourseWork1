@@ -69,4 +69,4 @@ def get_price_stock_promotion(code_promotion, date: datetime):
     else:
         print(f"Данные на {date} не найдены.")
 
-print(get_price_stock_promotion('AAPL', '2020-09-10'))
+# print(get_price_stock_promotion('AAPL', '2020-09-10'))
