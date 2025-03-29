@@ -1,5 +1,6 @@
 from collections import Counter
 from datetime import datetime, timedelta
+import json
 import pandas as pd
 from unicodedata import category
 import requests
@@ -104,12 +105,13 @@ def main_func(date: str, period: str = 'M'):
     result["income"] = income_dict
     result["currency_rates"] = currency_rates
     result["stock_prices"] = stock_prices
-    print(result)
+    json_result = json.dumps(result, indent=4, ensure_ascii=False)
+    print(json_result)
 
 
 
 if __name__ == "__main__":
-   main_func('20.01.2021', 'M')
+   main_func('09.01.2019', 'M')
 
 
 
