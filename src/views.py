@@ -109,7 +109,7 @@ def main_func(date: str, period: str = 'M'):
 
 
 if __name__ == "__main__":
-   main_func('17.09.2020', 'W')
+   main_func('20.01.2021', 'M')
 
 
 
