@@ -67,29 +67,24 @@ def converse_cur_by_date(cur_code: str, date: datetime):
     logger.info("Курс валюты успешно получен")
     return result
 
-# def get_price_stock_promotion(code_promotion, date: datetime):
-#     load_dotenv(dotenv_path="../.env")
-#     api_key = os.getenv("API_key")
-#     symbol = code_promotion  # Символ акции, например, Apple "AAPL"
-#     url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=full&apikey={api_key}"
-#
-#     response = requests.get(url)
-#     data = response.json()
-#
-#     # Получаем данные для указанной даты
-#     if date in data["Time Series (Daily)"]:
-#         daily_data = data["Time Series (Daily)"][date]
-#         price_promotion = round(float(daily_data['4. close']),2)
-#         logger.info("Курс акции успешно получен")
-#         return price_promotion
-#     else:
-#         logger.info("Курс валюты на заданную дату не найден")
-#         print(f"Данные на {date} не найдены.")
+def get_price_stock_promotion(code_promotion, date: datetime):
+    load_dotenv(dotenv_path="../.env")
+    api_key = os.getenv("API_key")
+    symbol = code_promotion  # Символ акции, например, Apple "AAPL"
+    url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=full&apikey={api_key}"
+
+    response = requests.get(url)
+    data = response.json()
+
+    # Получаем данные для указанной даты
+    if date in data["Time Series (Daily)"]:
+        daily_data = data["Time Series (Daily)"][date]
+        price_promotion = round(float(daily_data['4. close']),2)
+        logger.info("Курс акции успешно получен")
+        return price_promotion
+    else:
+        logger.info("Курс акции на заданную дату не найден")
+        print(f"Данные на {date} не найдены.")
 
 # print(get_price_stock_promotion('AAPL', '2020-09-10'))
-# print(filter_by_period("31.12.2021 16:44:00", "30.12.2021 00:44:00",
-#                        ({'Дата операции': ['30.12.2021 16:44:00', '29.12.2021 12:22:00', '28.12.2021 10:02:00'],
-#                          'Статус': ['OK', 'OK', 'OK'], 'Сумма операции': [-3000.0, -200.0, -10000.0],
-#                          'Валюта операции': ['RUB', 'RUB', 'RUB']})))
-result = converse_cur_by_date('USD', '2020-04-30')
-print(result)
+

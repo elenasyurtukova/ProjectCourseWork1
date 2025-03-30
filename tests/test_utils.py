@@ -5,7 +5,7 @@ from unittest.mock import patch, Mock
 import pandas as pd
 import pytest
 
-from src.utils import func_read_file_json, filter_by_period, converse_cur_by_date
+from src.utils import func_read_file_json, filter_by_period, converse_cur_by_date, get_price_stock_promotion
 from src.views import func_read_file_excel
 
 
@@ -112,6 +112,29 @@ def test_converse_cur_by_date_no_code_currency():
     with patch("requests.get", return_value=mock_response):
         with pytest.raises(ValueError, match="Failed to get currency rate"):
             converse_cur_by_date(mock_cur_code, mock_date)
+
+def test_get_price_stock_promotion():
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_code_promotion = "AAPL"
+    mock_date = '2025-03-26'
+    mock_response.json.return_value = {'Meta Data':
+    {'1. Information': 'Daily Prices (open, high, low, close) and Volumes', '2. Symbol': 'AAPL',
+    '3. Last Refreshed': '2025-03-28', '4. Output Size': 'Full size', '5. Time Zone': 'US/Eastern'},
+     'Time Series (Daily)': {
+         '2025-03-28': {'1. open': '221.6700', '2. high': '223.8100', '3. low': '217.6800', '4. close': '217.9000',
+                        '5. volume': '39818617'},
+         '2025-03-27': {'1. open': '221.3900', '2. high': '224.9900', '3. low': '220.5601', '4. close': '223.8500',
+                        '5. volume': '37094774'},
+         '2025-03-26': {'1. open': '223.5100', '2. high': '225.0200', '3. low': '220.4700', '4. close': '221.5300',
+                        '5. volume': '34532656'},
+         '2025-03-25': {'1. open': '220.7700', '2. high': '224.1000', '3. low': '220.0800', '4. close': '223.7500',
+                        '5. volume': '34493583'}
+     }}
+    with patch("requests.get", return_value=mock_response):
+        result = get_price_stock_promotion(mock_code_promotion, mock_date)
+        assert result == 221.53
+
 
 if __name__ == "__main__":
     unittest.main()

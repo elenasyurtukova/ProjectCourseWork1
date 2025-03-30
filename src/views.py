@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 import json
-from src.utils import func_read_file_excel, filter_by_period, func_read_file_json, converse_cur_by_date
-    # get_price_stock_promotion
+from src.utils import func_read_file_excel, filter_by_period, func_read_file_json, converse_cur_by_date, \
+    get_price_stock_promotion
+# get_price_stock_promotion
 import logging
 
 logging.basicConfig(
