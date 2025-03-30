@@ -25,7 +25,6 @@ def func_read_file_excel(path: str) -> list:
         logger.error("Файл не найден")
         print("Файл не найден")
         return []
-# print(func_read_file_excel('../data/operations.xlsx'))
 
 def filter_by_period(date1: datetime, date2: datetime, df):
     """Функция фильтрует датафрейм: попадают данные между заданными датами"""

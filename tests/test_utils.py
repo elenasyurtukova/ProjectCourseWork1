@@ -1,3 +1,4 @@
+import json
 import unittest
 from unittest.mock import patch, Mock
 
@@ -103,7 +104,14 @@ def test_converse_cur_by_date():
         result = converse_cur_by_date(mock_cur_code, mock_date)
         assert result == 74.37
 
-
+def test_converse_cur_by_date_no_code_currency():
+    mock_response = Mock()
+    mock_response.status_code = 400
+    mock_cur_code = ""
+    mock_date = '2020-04-30'
+    with patch("requests.get", return_value=mock_response):
+        with pytest.raises(ValueError, match="Failed to get currency rate"):
+            converse_cur_by_date(mock_cur_code, mock_date)
 
 if __name__ == "__main__":
     unittest.main()
