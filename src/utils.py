@@ -15,6 +15,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("utils")
 
+
 def func_read_file_excel(path: str) -> list:
     """Функция: считывает данные из файла excel и возвращает список словарей транзакций"""
     try:
@@ -26,13 +27,19 @@ def func_read_file_excel(path: str) -> list:
         print("Файл не найден")
         return []
 
+
 def filter_by_period(date1: datetime, date2: datetime, df):
     """Функция фильтрует датафрейм: попадают данные между заданными датами"""
     df = df.copy()
-    df['Дата операции'] = pd.to_datetime(df['Дата операции'], format='%d.%m.%Y %H:%M:%S')
-    filtered_df = df.loc[(df['Дата операции'] <= date1)&(df['Дата операции'] >= date2)]
+    df["Дата операции"] = pd.to_datetime(
+        df["Дата операции"], format="%d.%m.%Y %H:%M:%S"
+    )
+    filtered_df = df.loc[
+        (df["Дата операции"] <= date1) & (df["Дата операции"] >= date2)
+    ]
     logger.info("Данные отфильтрованы по заданному периоду")
     return filtered_df
+
 
 def func_read_file_json(path: str) -> dict:
     """функция: читает данные из json-файла пользовательских настроек"""
@@ -51,6 +58,7 @@ def func_read_file_json(path: str) -> dict:
         logger.error("Файл не найден")
         return {}
 
+
 def converse_cur_by_date(cur_code: str, date: datetime):
     """функция конвертирует валюту в рубли на заданную дату"""
     url = f"https://api.apilayer.com/exchangerates_data/convert?to=RUB&from={cur_code}&amount=1&date={date}"
@@ -67,7 +75,9 @@ def converse_cur_by_date(cur_code: str, date: datetime):
     logger.info("Курс валюты успешно получен")
     return result
 
+
 def get_price_stock_promotion(code_promotion, date: datetime):
+    """Функция: получает цену указанной акции на заданную дату"""
     load_dotenv(dotenv_path="../.env")
     api_key = os.getenv("API_key")
     symbol = code_promotion  # Символ акции, например, Apple "AAPL"
@@ -79,12 +89,10 @@ def get_price_stock_promotion(code_promotion, date: datetime):
     # Получаем данные для указанной даты
     if date in data["Time Series (Daily)"]:
         daily_data = data["Time Series (Daily)"][date]
-        price_promotion = round(float(daily_data['4. close']),2)
+        price_promotion = round(float(daily_data["4. close"]), 2)
         logger.info("Курс акции успешно получен")
         return price_promotion
     else:
         logger.info("Курс акции на заданную дату не найден")
         print(f"Данные на {date} не найдены.")
-
 # print(get_price_stock_promotion('AAPL', '2020-09-10'))
-
