@@ -29,7 +29,7 @@ def func_read_file_excel(path: str) -> list:
 
 def filter_by_period(date1: datetime, date2: datetime, df):
     """Функция фильтрует датафрейм: попадают данные между заданными датами"""
-    df = df.copy()  # Создаем копию DataFrame, чтобы избежать предупреждений
+    df = df.copy()
     df['Дата операции'] = pd.to_datetime(df['Дата операции'], format='%d.%m.%Y %H:%M:%S')
     filtered_df = df.loc[(df['Дата операции'] <= date1)&(df['Дата операции'] >= date2)]
     logger.info("Данные отфильтрованы по заданному периоду")
@@ -60,6 +60,7 @@ def converse_cur_by_date(cur_code: str, date: datetime):
     payload = {}
     headers = {"apikey": API_KEY}
     response = requests.get(url, headers=headers, data=payload)
+    print(response.json())
     if response.status_code != 200:
         raise ValueError("Failed to get currency rate")
         logger.error("Не удалось получить курс валюты")
@@ -91,3 +92,5 @@ def converse_cur_by_date(cur_code: str, date: datetime):
 #                        ({'Дата операции': ['30.12.2021 16:44:00', '29.12.2021 12:22:00', '28.12.2021 10:02:00'],
 #                          'Статус': ['OK', 'OK', 'OK'], 'Сумма операции': [-3000.0, -200.0, -10000.0],
 #                          'Валюта операции': ['RUB', 'RUB', 'RUB']})))
+result = converse_cur_by_date('USD', '2020-04-30')
+print(result)

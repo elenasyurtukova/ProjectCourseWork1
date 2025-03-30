@@ -1,10 +1,10 @@
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, Mock
 
 import pandas as pd
 import pytest
 
-from src.utils import func_read_file_json, filter_by_period
+from src.utils import func_read_file_json, filter_by_period, converse_cur_by_date
 from src.views import func_read_file_excel
 
 
@@ -61,30 +61,47 @@ class TestJsonReader(unittest.TestCase):
 
 @pytest.fixture()
 def df():
-    return pd.DataFrame({'Валюта операции': ['RUB', 'RUB', 'RUB'], 'Дата операции': ['30.12.2021 16:44:00', '29.12.2021 12:22:00', '28.12.2021 10:02:00'],
+    return pd.DataFrame({'Валюта операции': ['RUB', 'RUB', 'RUB'],
+                         'Дата операции': ['30.12.2021 16:44:00', '29.12.2021 12:22:00', '28.12.2021 10:02:00'],
                           'Статус': ['OK', 'OK', 'OK'], 'Сумма операции': [-3000.0, -200.0, -10000.0],
                           })
 
 @pytest.mark.parametrize(
     "date1, date2, expected_df",
     [
-        ("31.12.2021 16:44:00", "25.12.2021 16:44:00",(
-                {'Валюта операции': ['RUB', 'RUB', 'RUB'],
-                 'Дата операции': ['30.12.2021 16:44:00', '29.12.2021 12:22:00', '28.12.2021 10:02:00'],
-                'Статус': ['OK', 'OK', 'OK'], 'Сумма операции': [-3000.0, -200.0, -10000.0],
-                })
-                                                        ),
-        ("31.12.2021 16:44:00", "30.12.2021 00:44:00", ({'Валюта операции': ['RUB'],
-                                                         'Дата операции': ['30.12.2021 16:44:00'],
-                                                         'Статус': ['OK'], 'Сумма операции': [-3000.0]}
-        )),
-    ],
+        ("31.12.2021 16:44:00", "25.12.2021 16:44:00", pd.DataFrame({
+            'Валюта операции': ['RUB', 'RUB', 'RUB'],
+            'Дата операции': pd.to_datetime(['30.12.2021 16:44:00', '29.12.2021 12:22:00', '28.12.2021 10:02:00'],
+                                            format='%d.%m.%Y %H:%M:%S'),
+            'Статус': ['OK', 'OK', 'OK'],
+            'Сумма операции': [-3000.0, -200.0, -10000.0],
+        })),
+        ("31.12.2021 16:44:00", "30.12.2021 00:44:00", pd.DataFrame({
+            'Валюта операции': ['RUB'],
+            'Дата операции': pd.to_datetime(['30.12.2021 16:44:00'], format='%d.%m.%Y %H:%M:%S'),
+            'Статус': ['OK'],
+            'Сумма операции': [-3000.0],
+        })),
+    ]
 )
 def test_filter_by_period(df, date1, date2, expected_df):
     date1 = pd.to_datetime(date1)
     date2 = pd.to_datetime(date2)
-    df['Дата операции'] = pd.to_datetime(df['Дата операции'])
-    pd.testing.assert_frame_equal(filter_by_period(df, date1, date2), expected_df)
+    result_df = filter_by_period(date1, date2, df)
+    pd.testing.assert_frame_equal(result_df.reset_index(drop=True), expected_df.reset_index(drop=True))
+
+
+def test_converse_cur_by_date():
+    mock_response = Mock()
+    mock_response.status_code = 200
+    mock_cur_code = "USD"
+    mock_date = '2020-04-30'
+    mock_response.json.return_value = {'success': True, 'query': {'from': 'USD', 'to': 'RUB', 'amount': 1},
+                                       'info': {'timestamp': 1588291199, 'rate': 74.373499},
+                                       'date': '2020-04-30', 'historical': True, 'result': 74.373499}
+    with patch("requests.get", return_value=mock_response):
+        result = converse_cur_by_date(mock_cur_code, mock_date)
+        assert result == 74.37
 
 
 
