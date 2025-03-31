@@ -1,5 +1,5 @@
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 import json
 import requests
@@ -14,6 +14,32 @@ logging.basicConfig(
     filemode="w",
 )
 logger = logging.getLogger("utils")
+
+def time_period(date: str, period: str = "M"):
+    """Функция, определяет дату окончания по заданному атрибуту"""
+    try:
+        date1 = datetime.strptime(date, "%d.%m.%Y")
+        if period == "W":
+            if date1.day > 7:
+                date2 = date1 - timedelta(days=7)
+            else:
+                date2 = datetime(date1.year, date1.month, 1)
+        elif period == "M":
+            date2 = datetime(date1.year, date1.month, 1)
+        elif period == "Y":
+            date2 = datetime(date1.year, 1, 1)
+        elif period == "ALL":
+            date2 = datetime(2017, 1, 1)
+        else:
+            print(
+                "Задан неверный период, для работы программы используем период с начала месяца"
+            )
+            date2 = datetime(date1.year, date1.month, 1)
+        return date1, date2
+    except Exception as e:
+        logger.error("Задан неверный формат даты")
+        print(f"Error: {type(e).__name__}, задан неверный формат даты")
+    logger.info("Рассчитан период времени для анализа")
 
 
 def func_read_file_excel(path: str) -> list:

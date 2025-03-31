@@ -55,6 +55,5 @@ def spending_by_category(
             print(f"Error: {type(e).__name__}, полученная дата не существует")
     filtered_df = filter_by_period(date1, date2, transactions)
     category_df = filtered_df[filtered_df["Категория"] == category]
-    result_list = category_df.to_dict(orient="records")
     logger.info("Датафрейм отфильтрован по датам и категории")
-    return result_list
+    return category_df

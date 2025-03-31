@@ -26,7 +26,8 @@ def main():
     # Отчеты: траты по категориям
     category = input("Введите категорию для поиска\n")
     date = input("Введите дату в формате dd.mm.YYYY\n")
-    print(spending_by_category(df, category, date))
+    result_list = spending_by_category(df, category, date).to_dict(orient="records")
+    print(result_list)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import json
 import unittest
 from unittest.mock import patch, Mock
-
+from datetime import datetime
 import pandas as pd
 import pytest
 
@@ -9,7 +9,7 @@ from src.utils import (
     func_read_file_json,
     filter_by_period,
     converse_cur_by_date,
-    get_price_stock_promotion,
+    get_price_stock_promotion, time_period,
 )
 from src.views import func_read_file_excel
 
@@ -212,6 +212,21 @@ def test_get_price_stock_promotion():
         result = get_price_stock_promotion(mock_code_promotion, mock_date)
         assert result == 221.53
 
+@pytest.mark.parametrize(
+    "date, period, expected_tuple", [
+        ('01.03.2021', 'M', (datetime(2021, 3, 1, 0, 0),
+                             datetime(2021, 3, 1, 0, 0))),
+        ('11.09.2021', 'W', (datetime(2021, 9, 11, 0, 0),
+                             datetime(2021, 9, 4, 0, 0))),
+        ('11.04.2019', 'Y', (datetime(2019, 4, 11, 0, 0),
+                             datetime(2019, 1, 1, 0, 0)))
+    ])
+
+def test_time_period(date, period, expected_tuple):
+    assert time_period(date, period) == expected_tuple
+
+def test_time_period_wrong_format():
+    assert time_period('2019.04.19') == None
 
 if __name__ == "__main__":
     unittest.main()

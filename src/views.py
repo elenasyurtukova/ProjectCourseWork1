@@ -5,7 +5,7 @@ from src.utils import (
     filter_by_period,
     func_read_file_json,
     converse_cur_by_date,
-    get_price_stock_promotion,
+    get_price_stock_promotion, time_period,
 )
 import logging
 
@@ -21,29 +21,7 @@ logger = logging.getLogger("views")
 
 def main_func(date: str, period: str = "M"):
     """Функция анализа данных за период, конвертации валюты и получения цен акций"""
-    # получаем 2 даты, между которыми будем анализировать данные
-    try:
-        date1 = datetime.strptime(date, "%d.%m.%Y")
-    except Exception as e:
-        logger.error("Задан неверный формат даты")
-        print(f"Error: {type(e).__name__}, задан неверный формат даты")
-    if period == "W":
-        if date1.day > 7:
-            date2 = date1 - timedelta(days=7)
-        else:
-            date2 = datetime(date1.year, date1.month, 1)
-    elif period == "M":
-        date2 = datetime(date1.year, date1.month, 1)
-    elif period == "Y":
-        date2 = datetime(date1.year, 1, 1)
-    elif period == "ALL":
-        date2 = datetime(2017, 1, 1)
-    else:
-        print(
-            "Задан неверный период, для работы программы используем период с начала месяца"
-        )
-        date2 = datetime(date1.year, date1.month, 1)
-    logger.info("Рассчитан период времени для анализа")
+    date1, date2 = time_period(date, period)
     df = func_read_file_excel(
         "../data/operations.xlsx"
     )  # вызываем функцию для получения данных из файла excel
@@ -63,18 +41,18 @@ def main_func(date: str, period: str = "M"):
         "Сумма операции с округлением"
     ].sum()
     category_expenses_df = category_grouped_expenses_df.sort_values(ascending=False)
-    category_expenses_dict = category_expenses_df.to_dict()
-    if len(category_expenses_dict) <= 7:
+    category_expenses_list = category_expenses_df.to_dict()
+    if len(category_expenses_list) <= 7:
         category_expenses_list = []
-        for key, value in category_expenses_dict.items():
+        for key, value in category_expenses_list.items():
             elem = {}
             elem["category"] = key
             elem["amount"] = round(value)
             category_expenses_list.append(elem)
-    elif len(category_expenses_dict) > 7:
+    elif len(category_expenses_list) > 7:
         category_expenses_list = [
             {"category": key, "amount": round(value)}
-            for key, value in category_expenses_dict.items()
+            for key, value in category_expenses_list.items()
         ]
         elem_7 = category_expenses_list[:7]
         elem_last = category_expenses_list[7:]
