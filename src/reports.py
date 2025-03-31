@@ -38,22 +38,31 @@ def spending_by_category(
         date1 = datetime.strptime(date, "%d.%m.%Y")
     else:
         date1 = datetime.now()
-    if date1.month > 3:
-        try:
+    try:
+        if date1.month > 3:
             month_2 = date1.month - 3
             date2 = datetime(year=date1.year, month=month_2, day=date1.day)
-        except ValueError as e:
-            logger.error("Ошибка существования даты")
-            print(f"Error: {type(e).__name__}, полученная дата не существует")
-    else:
-        try:
+        else:
             year_2 = date1.year - 1
             month_2 = date1.month + 12 - 3
             date2 = datetime(year=year_2, month=month_2, day=date1.day)
-        except ValueError as e:
+        filtered_df = filter_by_period(date1, date2, transactions)
+        category_df = filtered_df[filtered_df["Категория"] == category]
+        logger.info("Датафрейм отфильтрован по датам и категории")
+        return category_df
+    except ValueError as e:
             logger.error("Ошибка существования даты")
             print(f"Error: {type(e).__name__}, полученная дата не существует")
-    filtered_df = filter_by_period(date1, date2, transactions)
-    category_df = filtered_df[filtered_df["Категория"] == category]
-    logger.info("Датафрейм отфильтрован по датам и категории")
-    return category_df
+
+@write_file(filename="result.json")
+def my_func():
+    return(pd.DataFrame(
+                {
+                    "Валюта операции": ["RUB"],
+                    "Дата операции": ["03.12.2021 16:44:00"],
+                    "Категория": ["Мобильная связь"],
+                    "Статус": ["OK"],
+                    "Сумма операции": [-3000.0],
+                }
+            ))
+my_func()

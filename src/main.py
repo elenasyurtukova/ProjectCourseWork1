@@ -21,7 +21,7 @@ def main():
     list_of_transactions = df.to_dict(orient="records")
     filtered_list = search_by_phone_number(list_of_transactions)
     json_filtered_list = json.dumps(filtered_list, indent=4, ensure_ascii=False)
-    print(json_filtered_list)
+    # print(json_filtered_list)
 
     # Отчеты: траты по категориям
     category = input("Введите категорию для поиска\n")
