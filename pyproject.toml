@@ -33,3 +33,16 @@ pytest-cov = "^6.0.0"
 line-length = 119
 exclude = '.git'
 
+
+[tool.coverage.report]
+exclude.also = [
+    'if __name__=.__mane__.',
+]
+
+[tool.isort]
+#line-length = 119
+
+[tool.mypy]
+disallow_untyped_defs = true
+warn_return_any = true
+exclude = 'venv'

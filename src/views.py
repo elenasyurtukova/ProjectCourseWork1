@@ -1,32 +1,22 @@
 import json
+
+from src.logger import get_logger
 from src.utils import (
-    func_read_file_excel,
     filter_by_period,
     func_read_file_json,
     converse_cur_by_date,
     get_price_stock_promotion, time_period,
 )
-import logging
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(filename)s - %(levelname)s: %(message)s",
-    filename="../logs/views.log",
-    encoding="UTF-8",
-    filemode="w",
-)
-logger = logging.getLogger("views")
+logger = get_logger("log.log")
 
 
-def main_func(date: str, period: str = "M"):
+def main_func(df, date: str, period: str = "M"):
     """Функция анализа данных за период, конвертации валюты и получения цен акций"""
     date1, date2 = time_period(date, period)
-    df = func_read_file_excel(
-        "../data/operations.xlsx"
-    )  # вызываем функцию для получения данных из файла excel
-    df_OK = df.loc[df["Статус"] == "OK"]  # фильтруем только успешные операции
+
     filtered_df = filter_by_period(
-        date1, date2, df_OK
+        date1, date2, df
     )  # вызываем функцию для фильтрации датафрейма по датам
     logger.info("Отфильтрованы данные со статусом 'ОК' в заданном временном интервале")
     # расходная часть
@@ -40,18 +30,18 @@ def main_func(date: str, period: str = "M"):
         "Сумма операции с округлением"
     ].sum()
     category_expenses_df = category_grouped_expenses_df.sort_values(ascending=False)
-    category_expenses_list = category_expenses_df.to_dict()
-    if len(category_expenses_list) <= 7:
+    category_expenses_dict = category_expenses_df.to_dict()
+    if len(category_expenses_dict) <= 7:
         category_expenses_list = []
-        for key, value in category_expenses_list.items():
+        for key, value in category_expenses_dict.items():
             elem = {}
             elem["category"] = key
             elem["amount"] = round(value)
             category_expenses_list.append(elem)
-    elif len(category_expenses_list) > 7:
+    elif len(category_expenses_dict) > 7:
         category_expenses_list = [
             {"category": key, "amount": round(value)}
-            for key, value in category_expenses_list.items()
+            for key, value in category_expenses_dict.items()
         ]
         elem_7 = category_expenses_list[:7]
         elem_last = category_expenses_list[7:]

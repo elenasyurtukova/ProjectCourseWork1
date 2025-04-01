@@ -6,35 +6,31 @@ import requests
 from dotenv import load_dotenv
 import logging
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(filename)s - %(levelname)s: %(message)s",
-    filename="../logs/utils.log",
-    encoding="UTF-8",
-    filemode="w",
-)
-logger = logging.getLogger("utils")
+from src.logger import get_logger
+
+logger = get_logger("log.log")
 
 def time_period(date: str, period: str = "M"):
     """Функция, определяет дату окончания по заданному атрибуту"""
     try:
         date1 = datetime.strptime(date, "%d.%m.%Y")
-        if period == "W":
+        if period == "W" or "w":
             if date1.day > 7:
                 date2 = date1 - timedelta(days=7)
             else:
                 date2 = datetime(date1.year, date1.month, 1)
-        elif period == "M":
+        elif period == "M" or "m":
             date2 = datetime(date1.year, date1.month, 1)
-        elif period == "Y":
+        elif period == "Y" or "y":
             date2 = datetime(date1.year, 1, 1)
-        elif period == "ALL":
+        elif period == "ALL" or "all":
             date2 = datetime(2017, 1, 1)
         else:
             print(
                 "Задан неверный период, для работы программы используем период с начала месяца"
             )
             date2 = datetime(date1.year, date1.month, 1)
+        logger.info("Получены начало и конец периода для анализа")
         return date1, date2
     except Exception as e:
         logger.error("Задан неверный формат даты")
@@ -93,7 +89,6 @@ def converse_cur_by_date(cur_code: str, date: datetime):
     payload = {}
     headers = {"apikey": API_KEY}
     response = requests.get(url, headers=headers, data=payload)
-    print(response.json())
     if response.status_code != 200:
         raise ValueError("Failed to get currency rate")
         logger.error("Не удалось получить курс валюты")

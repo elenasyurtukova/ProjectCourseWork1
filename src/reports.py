@@ -1,18 +1,13 @@
 from datetime import datetime
 from typing import Optional
 import pandas as pd
+
+from src.logger import get_logger
 from src.utils import filter_by_period
 from typing import Any, Callable
 import logging
 
-logging.basicConfig(
-    level=logging.DEBUG,
-    format="%(asctime)s - %(filename)s - %(levelname)s: %(message)s",
-    filename="../logs/reports.log",
-    encoding="UTF-8",
-    filemode="w",
-)
-logger = logging.getLogger("reports")
+logger = get_logger("log.log")
 
 
 def write_file(filename: str | None = None) -> Callable:
