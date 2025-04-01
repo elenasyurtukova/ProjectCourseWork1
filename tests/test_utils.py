@@ -1,4 +1,3 @@
-import json
 import unittest
 from unittest.mock import patch, Mock
 from datetime import datetime
@@ -9,9 +8,10 @@ from src.utils import (
     func_read_file_json,
     filter_by_period,
     converse_cur_by_date,
-    get_price_stock_promotion, time_period,
+    get_price_stock_promotion, time_period, func_read_file_excel,
 )
-from src.views import func_read_file_excel
+
+
 
 
 class TestReadExcelFile(unittest.TestCase):

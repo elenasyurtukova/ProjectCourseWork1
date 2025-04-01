@@ -8,7 +8,7 @@ def get_logger(filename: str) -> logging.Logger:
     logging.basicConfig(
         level=logging.DEBUG,
         format="%(asctime)s - %(filename)s - %(levelname)s: %(message)s",
-        filename= PATH_TO_LOGGER / filename,
+        filename=PATH_TO_LOGGER / filename,
         encoding="UTF-8",
         filemode="w",
     )

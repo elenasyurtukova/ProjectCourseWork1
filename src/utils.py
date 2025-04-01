@@ -1,34 +1,33 @@
+import json
 import os
 from datetime import datetime, timedelta
+
 import pandas as pd
-import json
 import requests
 from dotenv import load_dotenv
-import logging
 
 from src.logger import get_logger
 
 logger = get_logger("log.log")
 
+
 def time_period(date: str, period: str = "M"):
     """Функция, определяет дату окончания по заданному атрибуту"""
     try:
         date1 = datetime.strptime(date, "%d.%m.%Y")
-        if period == "W" or "w":
+        if period == "W":
             if date1.day > 7:
                 date2 = date1 - timedelta(days=7)
             else:
                 date2 = datetime(date1.year, date1.month, 1)
-        elif period == "M" or "m":
+        elif period == "M":
             date2 = datetime(date1.year, date1.month, 1)
-        elif period == "Y" or "y":
+        elif period == "Y":
             date2 = datetime(date1.year, 1, 1)
-        elif period == "ALL" or "all":
+        elif period == "ALL":
             date2 = datetime(2017, 1, 1)
         else:
-            print(
-                "Задан неверный период, для работы программы используем период с начала месяца"
-            )
+            print("Задан неверный период, для работы программы используем период с начала месяца")
             date2 = datetime(date1.year, date1.month, 1)
         logger.info("Получены начало и конец периода для анализа")
         return date1, date2
@@ -53,12 +52,8 @@ def func_read_file_excel(path: str) -> list:
 def filter_by_period(date1: datetime, date2: datetime, df):
     """Функция фильтрует датафрейм: попадают данные между заданными датами"""
     df = df.copy()
-    df["Дата операции"] = pd.to_datetime(
-        df["Дата операции"], format="%d.%m.%Y %H:%M:%S"
-    )
-    filtered_df = df.loc[
-        (df["Дата операции"] <= date1) & (df["Дата операции"] >= date2)
-    ]
+    df["Дата операции"] = pd.to_datetime(df["Дата операции"], format="%d.%m.%Y %H:%M:%S")
+    filtered_df = df.loc[(df["Дата операции"] <= date1) & (df["Дата операции"] >= date2)]
     logger.info("Данные отфильтрованы по заданному периоду")
     return filtered_df
 
@@ -116,4 +111,6 @@ def get_price_stock_promotion(code_promotion, date: datetime):
     else:
         logger.info("Курс акции на заданную дату не найден")
         print(f"Данные на {date} не найдены.")
+
+
 # print(get_price_stock_promotion('AAPL', '2020-09-10'))
