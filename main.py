@@ -1,5 +1,6 @@
 import json
 
+from config import PATH_TO_OPERATIONS
 from src.logger import get_logger
 from src.reports import spending_by_category
 from src.services import search_by_phone_number
@@ -19,14 +20,14 @@ def main():
     Y - от 01 января до заданной даты текущего года
     ALL - все данные из файла с транзакциями\n"""
     )
-    df = func_read_file_excel("../data/operations.xlsx")
+    df = func_read_file_excel(PATH_TO_OPERATIONS)
     df_OK = df.loc[df["Статус"] == "OK"]
     result = main_func(df_OK, date, period)
     logger.info("Получены данные для страницы «События»")
     print(result)
 
     # Сервисы: поиск по телефонным номерам
-    df = func_read_file_excel("../data/operations.xlsx")
+    df = func_read_file_excel(PATH_TO_OPERATIONS)
     list_of_transactions = df.to_dict(orient="records")
     filtered_list = search_by_phone_number(list_of_transactions)
     json_filtered_list = json.dumps(filtered_list, indent=4, ensure_ascii=False)

@@ -6,6 +6,7 @@ import pandas as pd
 import requests
 from dotenv import load_dotenv
 
+from config import PATH_TO_ENV
 from src.logger import get_logger
 
 logger = get_logger("log.log")
@@ -79,7 +80,7 @@ def func_read_file_json(path: str) -> dict:
 def converse_cur_by_date(cur_code: str, date: datetime):
     """функция конвертирует валюту в рубли на заданную дату"""
     url = f"https://api.apilayer.com/exchangerates_data/convert?to=RUB&from={cur_code}&amount=1&date={date}"
-    load_dotenv(dotenv_path="../.env")
+    load_dotenv(dotenv_path=PATH_TO_ENV)
     API_KEY = os.getenv("API_KEY")
     payload = {}
     headers = {"apikey": API_KEY}
@@ -94,7 +95,7 @@ def converse_cur_by_date(cur_code: str, date: datetime):
 
 def get_price_stock_promotion(code_promotion, date: datetime):
     """Функция: получает цену указанной акции на заданную дату"""
-    load_dotenv(dotenv_path="../.env")
+    load_dotenv(dotenv_path=PATH_TO_ENV)
     api_key = os.getenv("API_key")
     symbol = code_promotion  # Символ акции, например, Apple "AAPL"
     url = f"https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol={symbol}&outputsize=full&apikey={api_key}"

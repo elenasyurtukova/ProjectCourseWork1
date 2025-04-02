@@ -1,5 +1,6 @@
 import json
 
+from config import PATH_TO_USER_SETTINGS
 from src.logger import get_logger
 from src.utils import (converse_cur_by_date, filter_by_period,
                        func_read_file_json, get_price_stock_promotion,
@@ -58,7 +59,7 @@ def main_func(df, date: str, period: str = "M"):
         {"category": key, "amount": round(value)} for key, value in category_incoming_dict.items()
     ]
 
-    user_settings = func_read_file_json("../user_settings.json")
+    user_settings = func_read_file_json(PATH_TO_USER_SETTINGS)
     # {'user_currencies': ['USD', 'EUR'], 'user_stocks': ['AAPL', 'AMZN', 'GOOGL', 'MSFT', 'TSLA']}
 
     currency_rates = []
