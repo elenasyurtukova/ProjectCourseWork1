@@ -8,10 +8,10 @@ from src.utils import (
     func_read_file_json,
     filter_by_period,
     converse_cur_by_date,
-    get_price_stock_promotion, time_period, func_read_file_excel,
+    get_price_stock_promotion,
+    time_period,
+    func_read_file_excel,
 )
-
-
 
 
 class TestReadExcelFile(unittest.TestCase):
@@ -117,9 +117,7 @@ def df():
             pd.DataFrame(
                 {
                     "Валюта операции": ["RUB"],
-                    "Дата операции": pd.to_datetime(
-                        ["30.12.2021 16:44:00"], format="%d.%m.%Y %H:%M:%S"
-                    ),
+                    "Дата операции": pd.to_datetime(["30.12.2021 16:44:00"], format="%d.%m.%Y %H:%M:%S"),
                     "Статус": ["OK"],
                     "Сумма операции": [-3000.0],
                 }
@@ -131,9 +129,7 @@ def test_filter_by_period(df, date1, date2, expected_df):
     date1 = pd.to_datetime(date1)
     date2 = pd.to_datetime(date2)
     result_df = filter_by_period(date1, date2, df)
-    pd.testing.assert_frame_equal(
-        result_df.reset_index(drop=True), expected_df.reset_index(drop=True)
-    )
+    pd.testing.assert_frame_equal(result_df.reset_index(drop=True), expected_df.reset_index(drop=True))
 
 
 def test_converse_cur_by_date():
@@ -212,21 +208,22 @@ def test_get_price_stock_promotion():
         result = get_price_stock_promotion(mock_code_promotion, mock_date)
         assert result == 221.53
 
-@pytest.mark.parametrize(
-    "date, period, expected_tuple", [
-        ('01.03.2021', 'M', (datetime(2021, 3, 1, 0, 0),
-                             datetime(2021, 3, 1, 0, 0))),
-        ('11.09.2021', 'W', (datetime(2021, 9, 11, 0, 0),
-                             datetime(2021, 9, 4, 0, 0))),
-        ('11.04.2019', 'Y', (datetime(2019, 4, 11, 0, 0),
-                             datetime(2019, 1, 1, 0, 0)))
-    ])
 
+@pytest.mark.parametrize(
+    "date, period, expected_tuple",
+    [
+        ("01.03.2021", "M", (datetime(2021, 3, 1, 0, 0), datetime(2021, 3, 1, 0, 0))),
+        ("11.09.2021", "W", (datetime(2021, 9, 11, 0, 0), datetime(2021, 9, 4, 0, 0))),
+        ("11.04.2019", "Y", (datetime(2019, 4, 11, 0, 0), datetime(2019, 1, 1, 0, 0))),
+    ],
+)
 def test_time_period(date, period, expected_tuple):
     assert time_period(date, period) == expected_tuple
 
+
 def test_time_period_wrong_format():
-    assert time_period('2019.04.19') == None
+    assert time_period("2019.04.19") == None
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -31,9 +31,7 @@ def df():
             pd.DataFrame(
                 {
                     "Валюта операции": ["RUB"],
-                    "Дата операции": pd.to_datetime(
-                        ["25.11.2021 10:02:00"], format="%d.%m.%Y %H:%M:%S"
-                    ),
+                    "Дата операции": pd.to_datetime(["25.11.2021 10:02:00"], format="%d.%m.%Y %H:%M:%S"),
                     "Категория": ["Супермаркеты"],
                     "Статус": ["OK"],
                     "Сумма операции": [-10000.0],
@@ -46,9 +44,7 @@ def df():
             pd.DataFrame(
                 {
                     "Валюта операции": ["RUB"],
-                    "Дата операции": pd.to_datetime(
-                        ["03.12.2021 16:44:00"], format="%d.%m.%Y %H:%M:%S"
-                    ),
+                    "Дата операции": pd.to_datetime(["03.12.2021 16:44:00"], format="%d.%m.%Y %H:%M:%S"),
                     "Категория": ["Мобильная связь"],
                     "Статус": ["OK"],
                     "Сумма операции": [-3000.0],
@@ -59,12 +55,12 @@ def df():
 )
 def test_spending_by_category(df, date, category, expected_df):
     result_df = spending_by_category(df, category, date)
-    pd.testing.assert_frame_equal(
-        result_df.reset_index(drop=True), expected_df.reset_index(drop=True)
-    )
+    pd.testing.assert_frame_equal(result_df.reset_index(drop=True), expected_df.reset_index(drop=True))
+
 
 def test_spending_by_category_unknown_date(df):
-    assert spending_by_category(df, 'Супермаркеты', '29.05.2019') == None
+    assert spending_by_category(df, "Супермаркеты", "29.05.2019") == None
+
 
 def test_write_file():
     # Тестирование с временным файлом
@@ -75,7 +71,7 @@ def test_write_file():
         # Применяем декоратор с временным файлом
         @write_file(filename=filename)
         def my_function():
-            return (pd.DataFrame(
+            return pd.DataFrame(
                 {
                     "Валюта операции": ["RUB"],
                     "Дата операции": ["03.12.2021 16:44:00"],
@@ -83,7 +79,7 @@ def test_write_file():
                     "Статус": ["OK"],
                     "Сумма операции": [-3000.0],
                 }
-            ))
+            )
 
         # Вызываем функцию
         my_function()
@@ -91,7 +87,9 @@ def test_write_file():
         # Проверяем содержимое временного файла
         with open(filename, "r", encoding="utf-8") as file:
             result = file.read()
-            assert result == ('[{"Валюта операции":"RUB","Дата операции":"03.12.2021 16:44:00","Категория":"Мобильная связь","Статус":"OK","Сумма операции":-3000.0}]')
+            assert result == (
+                '[{"Валюта операции":"RUB","Дата операции":"03.12.2021 16:44:00","Категория":"Мобильная связь","Статус":"OK","Сумма операции":-3000.0}]'
+            )
 
     finally:
         # Удаляем временный файл
