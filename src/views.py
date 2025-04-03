@@ -2,9 +2,13 @@ import json
 
 from config import PATH_TO_USER_SETTINGS
 from src.logger import get_logger
-from src.utils import (converse_cur_by_date, filter_by_period,
-                       func_read_file_json, get_price_stock_promotion,
-                       time_period)
+from src.utils import (
+    converse_cur_by_date,
+    filter_by_period,
+    func_read_file_json,
+    get_price_stock_promotion,
+    time_period,
+)
 
 logger = get_logger("log.log")
 

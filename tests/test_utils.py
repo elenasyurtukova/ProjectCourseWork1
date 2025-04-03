@@ -5,9 +5,14 @@ from unittest.mock import Mock, patch
 import pandas as pd
 import pytest
 
-from src.utils import (converse_cur_by_date, filter_by_period,
-                       func_read_file_excel, func_read_file_json,
-                       get_price_stock_promotion, time_period)
+from src.utils import (
+    converse_cur_by_date,
+    filter_by_period,
+    func_read_file_excel,
+    func_read_file_json,
+    get_price_stock_promotion,
+    time_period,
+)
 
 
 class TestReadExcelFile(unittest.TestCase):
